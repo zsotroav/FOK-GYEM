@@ -33,7 +33,7 @@ uint8_t driver_getByteAt(uint8_t x, uint8_t y) {
 	if(x > (DRV_COL_COUNT / 8) || y > DRV_ROW_COUNT) {
 		return 0;	//Out of range
 	}
-	return _buffer[AT(x,y)] ^= ((y%2) ? 0x55 : 0xAA);	//Checkboard compensation based on the row
+	return _buffer[AT(x,y)] ^= ((y%2) ? 0xAA : 0x55);	//Checkboard compensation based on the row
 }
 
 void driver_setByteAt(uint8_t x, uint8_t y, uint8_t byte) {
@@ -41,16 +41,16 @@ void driver_setByteAt(uint8_t x, uint8_t y, uint8_t byte) {
 		return;	//Out of range
 	}
 	//Apply checkboard pattern based on the row
-	_buffer[AT(x,y)] = (y%2) ? byte ^ 0x55 : byte ^ 0xAA;
+	_buffer[AT(x,y)] = (y%2) ? byte ^ 0xAA : byte ^ 0x55;
 }
 
 void driver_getBuffer(uint8_t * data) {
 	for(uint8_t i = 0; i < DRV_COL_COUNT/8*CFG_PANEL_COUNT; i++) {
 		for(uint8_t j = 0; j < DRV_ROW_COUNT; j++) {
 			if(j%2 == 0) {
-				data[AT(i,j)] = _buffer[AT(i,j)] ^ 0x55;
-			} else {
 				data[AT(i,j)] = _buffer[AT(i,j)] ^ 0xAA;
+			} else {
+				data[AT(i,j)] = _buffer[AT(i,j)] ^ 0x55;
 			}
 		}
 	}
@@ -65,9 +65,9 @@ void driver_setBuffer(const uint8_t * data, uint8_t size) {
 	for(uint8_t i = 0; i < DRV_COL_COUNT/8*CFG_PANEL_COUNT; i++) {
 		for(uint8_t j = 0; j < DRV_ROW_COUNT; j++) {
 			if(j%2 == 0) {
-				_buffer[AT(i,j)] = data[AT(i,j)] ^ 0x55;
-			} else {
 				_buffer[AT(i,j)] = data[AT(i,j)] ^ 0xAA;
+			} else {
+				_buffer[AT(i,j)] = data[AT(i,j)] ^ 0x55;
 			}
 		}
 	}
