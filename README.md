@@ -33,4 +33,4 @@ After setup, the program automatically enters this function and loops it indefin
 3. Connect 12-15V DC to the controller
 
 ## Support
-Join the [Discord support server](https://discord.gg/D7EgcpuUdG) (English or Hungarian)
+Join the [Discord support server](https://discord.gg/dMrwaAkEcv) (English or Hungarian)
