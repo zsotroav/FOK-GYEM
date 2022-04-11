@@ -4,6 +4,8 @@ Unofficial FOK-GYEM screen driver for Arduino and Arduino-like devices. Requires
 ## PCB
 Version 1 of the PCB design is available as a KiCad Project and Gerber zip on [mega.nz](https://mega.nz/file/3mAA2AxQ#uEkXPkIazQjaFEwh2zbjOequC6g8-KIUfY65_SY9eXo)
 
+> The PCB design is currently being revised due to limited availability and high price of the used components.
+
 ## Usage - Software
 
 1. Set CFG_PANEL_COUNT and other settings in `config.h`
@@ -31,4 +33,4 @@ After setup, the program automatically enters this function and loops it indefin
 3. Connect 12-15V DC to the controller
 
 ## Support
-Contact [zsotroav#8941](https://discord.com/users/389315198391025666) on Discord
+Join the [Discord support server](https://discord.gg/D7EgcpuUdG) (English or Hungarian)
