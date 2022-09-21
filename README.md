@@ -22,7 +22,7 @@ sCom_waitForData(buff, DRV_DATABUFF_SIZE);
 driver_setBuffer(buff, DRV_DATABUFF_SIZE);
 driver_writeScreen();
 ```
-5. Remove any remaining or corrupted serial data from the buffer:
+6. Remove any remaining or corrupted serial data from the buffer:
 ```cpp
 while(Serial.available()) {
    Serial.read();
