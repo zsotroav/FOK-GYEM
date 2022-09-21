@@ -8,7 +8,11 @@ Version 1 of the PCB design is available as a KiCad Project and Gerber zip on [m
 
 ## Usage - Software
 
-1. Set CFG_PANEL_COUNT and other settings in `config.h`
+> :warning: **STATIC MODE BRANCH**: This branch contains code mainly for static (self-operating) mode! Use branch `serial/master` for serial (dynamic-opeating) mode.
+
+> :information_source: See `main.cpp` for working example code.
+
+1. Set `CFG_PANEL_COUNT`, `CFG_PIXEL_POLARITY`, `CFG_RELATIVE_MODE` and other settings in `config.h`
 2. Call `driver_init();` in `void setup()` in `main.cpp`
 3. Write data to the screen using:
 ```cpp
@@ -23,7 +27,7 @@ Where your code is executed
 ### void loop()
 After setup, the program automatically enters this function and loops it indefinitely.
 
-### For more info see the comments in the code.
+### For more info see the comments and briefs in the code.
 
 ## Usage - Physical devices
 1. Connect screen cables to FOK-GYEM
