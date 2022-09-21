@@ -5,7 +5,7 @@
 /**
  * @brief Set to the exact amount of panels in the display. Never set it lower!!!
  */
-#define CFG_PANEL_COUNT 4
+#define CFG_PANEL_COUNT 7
 /**
  * @brief Set the byte polarity of the driver - 0 is normal, 1 is inverted
  */
