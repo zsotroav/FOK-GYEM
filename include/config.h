@@ -2,12 +2,19 @@
 #define _CONFIG_HEADER_
 
 
-
 /**
  * @brief Set to the exact amount of panels in the display. Never set it lower!!!
- * 
  */
-#define CFG_PANEL_COUNT 7
+#define CFG_PANEL_COUNT 4
+/**
+ * @brief Set the byte polarity of the driver - 0 is normal, 1 is inverted
+ */
+#define CFG_PIXEL_POLARITY 0
+
+/**
+ * @brief Enabling relative mode only updates the pixels that are different compared to the previous state
+ */
+#define CFG_RELATIVE_MODE 1
 
 //PIN DEFINITIONS
 

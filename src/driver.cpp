@@ -1,7 +1,9 @@
 #include "driver.h"
 #include "shiftRegister.h"
 
-#define _BIT_AT(COL, ROW) (_buffer[AT((COL)/8,(ROW))] & (0x80 >> ((COL)%8)))
+#define _BIT_AT(BUFFER, COL, ROW) (BUFFER[AT((COL)/8,(ROW))] & (0x80 >> ((COL)%8)))
+#define _BIT_AT_B(COL, ROW) (_BIT_AT(_buffer, COL, ROW))
+#define _BIT_AT_BPRV(COL, ROW) (_BIT_AT(_buffer_prev, COL, ROW))
 
 enum _DRV_ROW_CONTROL_MODE {
 	_DRV_ROW_CONTROL_MODE_SINK,
@@ -10,9 +12,9 @@ enum _DRV_ROW_CONTROL_MODE {
 
 /**
  * @brief Stores the display data, in a checkboard compensated form.
- * 
  */
 static uint8_t _buffer[DRV_DATABUFF_SIZE];
+static uint8_t _buffer_prev[DRV_DATABUFF_SIZE];
 
 static shiftReg_t _rowCntrlReg = {
 	.PIN_DATA			= CFG_ROW_CONTROL_DATA,
@@ -65,9 +67,9 @@ void driver_setBuffer(const uint8_t * data, uint8_t size) {
 	for(uint8_t i = 0; i < DRV_COL_COUNT/8*CFG_PANEL_COUNT; i++) {
 		for(uint8_t j = 0; j < DRV_ROW_COUNT; j++) {
 			if(j%2 == 0) {
-				_buffer[AT(i,j)] = data[AT(i,j)] ^ 0xAA;
+				_buffer[AT(i,j)] = data[AT(i,j)] ^ (CFG_PIXEL_POLARITY ? 0x55 : 0xAA);
 			} else {
-				_buffer[AT(i,j)] = data[AT(i,j)] ^ 0x55;
+				_buffer[AT(i,j)] = data[AT(i,j)] ^ (CFG_PIXEL_POLARITY ? 0xAA : 0x55);
 			}
 		}
 	}
@@ -161,7 +163,7 @@ static void _driver_setRowControl(enum _DRV_ROW_CONTROL_MODE mode, uint8_t row, 
  * the drivers to flick the display pixel. For the reverse flick, we do the same thing, with different row data.
  */
 void driver_writeScreen() {
-
+	
 	for(uint8_t row = 0; row < DRV_ROW_COUNT; row++) {
 
 		for(uint8_t panel = 0; panel < CFG_PANEL_COUNT; panel++) {
@@ -170,14 +172,19 @@ void driver_writeScreen() {
 			
 			shiftReg_sendData(&_colCntrlReg, 0x01, 1); //Putting the first bit into the first shift register
 			//COL data setup SOURCE
-			for(uint8_t col = DRV_COL_COUNT; col > 0 ; col--) {
-				if(_BIT_AT(col-1+DRV_COL_COUNT*panel, row)) { //Current pin is set
-					shiftReg_latchData(&_colCntrlReg);
-					shiftReg_outputSet(&_rowCntrlReg, true);
-					digitalWrite(CFG_COL_CONTROL_OUTPUT_12V, CFG_COL_CONTROL_OUTPUT_12V_ON);
-					delay(1);
-					digitalWrite(CFG_COL_CONTROL_OUTPUT_12V, CFG_COL_CONTROL_OUTPUT_12V_OFF);
-					shiftReg_outputSet(&_rowCntrlReg, false);
+			for(uint8_t col = DRV_COL_COUNT; col > 0 ; col--) { //Current pin is set
+				uint16_t colIndx = col-1+DRV_COL_COUNT*panel;
+
+				if(_BIT_AT_B(colIndx, row)){ //Bit is set
+					if((CFG_RELATIVE_MODE &&  (_BIT_AT_BPRV(colIndx, row) == 0)) || !CFG_RELATIVE_MODE) {
+
+						shiftReg_latchData(&_colCntrlReg);
+						shiftReg_outputSet(&_rowCntrlReg, true);
+						digitalWrite(CFG_COL_CONTROL_OUTPUT_12V, CFG_COL_CONTROL_OUTPUT_12V_ON);
+						delay(1);
+						shiftReg_outputSet(&_rowCntrlReg, false);
+						digitalWrite(CFG_COL_CONTROL_OUTPUT_12V, CFG_COL_CONTROL_OUTPUT_12V_OFF);
+					}				
 				}
 				shiftReg_shiftIn(&_colCntrlReg);
 			}
@@ -186,17 +193,30 @@ void driver_writeScreen() {
 			_driver_setRowControl(_DRV_ROW_CONTROL_MODE_SOURCE, row, panel);
 			//COL data setup SINK
 			for(uint8_t col = DRV_COL_COUNT; col > 0; col--) {
-				
-				if(_BIT_AT(col-1+DRV_COL_COUNT*panel, row) == 0) { //Current pin is not set
-					shiftReg_latchData(&_colCntrlReg);
-					shiftReg_outputSet(&_rowCntrlReg, true);
-					digitalWrite(CFG_COL_CONTROL_OUTPUT_GND, CFG_COL_CONTROL_OUTPUT_GND_ON);
-					delay(1);
-					digitalWrite(CFG_COL_CONTROL_OUTPUT_GND, CFG_COL_CONTROL_OUTPUT_GND_OFF);
-					shiftReg_outputSet(&_rowCntrlReg, false);
+				uint16_t colIndx = col-1+DRV_COL_COUNT*panel;
+
+				if(_BIT_AT_B(colIndx, row) == 0){ //Current pin is not set
+					if((CFG_RELATIVE_MODE && _BIT_AT_BPRV(colIndx, row)) || !CFG_RELATIVE_MODE) { 
+						shiftReg_latchData(&_colCntrlReg);
+						shiftReg_outputSet(&_rowCntrlReg, true);
+						digitalWrite(CFG_COL_CONTROL_OUTPUT_GND, CFG_COL_CONTROL_OUTPUT_GND_ON);
+						delay(1);
+						digitalWrite(CFG_COL_CONTROL_OUTPUT_GND, CFG_COL_CONTROL_OUTPUT_GND_OFF);
+						shiftReg_outputSet(&_rowCntrlReg, false);
+					}
 				}
 				shiftReg_shiftIn(&_colCntrlReg);
 			}
 		}
 	}
+	memcpy(_buffer_prev, _buffer, DRV_DATABUFF_SIZE);
+}
+
+void driver_forceWriteScreen() {
+	if(CFG_RELATIVE_MODE) {
+		for (size_t i = 0; i < DRV_DATABUFF_SIZE; i++) {
+			_buffer_prev[i] = ~_buffer[i];
+		}
+	}
+	driver_writeScreen();
 }
