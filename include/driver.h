@@ -51,6 +51,17 @@ void driver_getBuffer(uint8_t * data);
  */
 void driver_setBuffer(const uint8_t * data, uint8_t size);
 
+/**
+ * @brief Writes the content of the internal buffer onto the screen.
+ * When relative mode is used, stores the previous writeScreen data, and only writes the modified pixels onto the screen.
+ * 
+ */
 void driver_writeScreen();
+
+/**
+ * @brief In relative mode overrites the full screen with the given buffer data.
+ * 
+ */
+void driver_forceWriteScreen();
 
 #endif
