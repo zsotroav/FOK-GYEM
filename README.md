@@ -12,22 +12,7 @@ Version 1 of the PCB design is available as a KiCad Project and Gerber zip on [m
 
 > :information_source: See `main.cpp` for working example code.
 
-1. Set `CFG_PANEL_COUNT`, `CFG_PIXEL_POLARITY`, `CFG_RELATIVE_MODE` and other settings in `config.h`
-2. Initialize serrial communication (`sCom_init(&Serial, 115200);`)
-3. Call `driver_init();` in `void setup()` in `main.cpp`
-4. Wait and take for serial input: `sCom_waitForData(buff, DRV_DATABUFF_SIZE);`
-5. Write data to the screen using:
-```cpp
-sCom_waitForData(buff, DRV_DATABUFF_SIZE);
-driver_setBuffer(buff, DRV_DATABUFF_SIZE);
-driver_writeScreen();
-```
-6. Remove any remaining or corrupted serial data from the buffer:
-```cpp
-while(Serial.available()) {
-   Serial.read();
-}
-```
+> :information_source: Full protocol description: [FOK-GYEM_Ultimate-Serial/ProtocolDescription.md](https://github.com/zsotroav/FOK-GYEM_Ultimate-Serial/blob/main/ProtocolDescription.md)
 
 ### void setup()
 Where your code is executed
