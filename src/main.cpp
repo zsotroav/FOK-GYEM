@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "shiftRegister.h"
 #include "driver.h"
-#include "serialCom.h"
 
 // Screen buffer
 uint8_t buff[DRV_DATABUFF_SIZE] = {0}; 
@@ -69,7 +68,7 @@ void loop()
         if (inbuff[1] == 0x11)
         { // Write full screen
             // Merge length data
-            uint16_t got = ((uint16_t)inbuff[2] << 32) | (uint16_t)inbuff[3]; 
+            uint16_t got = ((uint16_t)inbuff[2] << 8) | (uint16_t)inbuff[3];
 
             // Check if sent length is what we'd expect
             if (got == DRV_DATABUFF_SIZE){
@@ -90,10 +89,11 @@ void loop()
             byte ^= (-inbuff[2] ^ byte) & (1UL << (inbuff[0] % 8));
 
             driver_setByteAt(inbuff[0] / 8, inbuff[1], byte);
-        } else if (inbuff[1] == 0x19)
+        } 
+        else if (inbuff[1] == 0x19)
         { // Force write full screen
             // Merge length data
-            uint16_t got = ((uint16_t)inbuff[2] << 32) | (uint16_t)inbuff[3]; 
+            uint16_t got = ((uint16_t)inbuff[2] << 8) | (uint16_t)inbuff[3]; 
 
             // Check if sent length is what we'd expect
             if (got == DRV_DATABUFF_SIZE){
@@ -105,7 +105,6 @@ void loop()
                 return;
             }
         }
-        else
 
         Serial.write(CD);
         Serial.write(0x01); // Success message
