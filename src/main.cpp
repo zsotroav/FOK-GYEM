@@ -12,8 +12,8 @@ byte handshake[8] = {0xAA, 0x55, 0xAA, 0x55, 0x01, 0x07, 0x18, 0x07};
 // Our reply to the handshake
 byte message[6] = {0x01, 0x07, 0x18, 0x07, 0x00, 0x00}; 
 
-// Connection reference number (TODO: should be randomized)
-byte CD = 0xAF; 
+// Connection reference number. Randomized for each connection 
+byte CD = 0xAF;
 
 void setup()
 {
@@ -27,6 +27,7 @@ void setup()
 
     // Start serial
     Serial.begin(9600);
+    randomSeed(millis());
 
     // Wait for connection with proper handshake
     bool wait = true;
@@ -36,6 +37,8 @@ void setup()
         {
             // Read the handshake
             Serial.readBytes(inbuff, 8);
+
+            CD = (random(0, 256) & 0xFF);
 
             // If it is what we expect, good.
             if (memcmp(inbuff, handshake, 8) == 0)
