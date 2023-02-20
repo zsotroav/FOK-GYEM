@@ -8,9 +8,9 @@ uint8_t buff[DRV_DATABUFF_SIZE] = {0};
 // Buffer for incoming small data
 byte inbuff[8] = {0}; 
 // Expected handshake
-byte handshake[8] = {0xAA, 0x55, 0xAA, 0x55, 0x01, 0x07, 0x18, 0x07}; 
+byte handshake[8] = {0xAA, 0x55, 0xAA, 0x55, 0x01, 0x01, 0x18, 0x07}; 
 // Our reply to the handshake
-byte message[6] = {0x01, 0x07, 0x18, 0x07, 0x00, 0x00}; 
+byte message[6] = {0x01, 0x01, 0x18, 0x07, 0x00, 0x00}; 
 
 // Connection reference number. Randomized for each connection 
 byte CD = 0xAF;
@@ -76,6 +76,7 @@ void loop()
             // Check if sent length is what we'd expect
             if (got == DRV_DATABUFF_SIZE){
                 Serial.readBytes(buff, DRV_DATABUFF_SIZE);
+                driver_setBuffer(buff, DRV_DATABUFF_SIZE);
                 driver_writeScreen();
             } else {
                 Serial.write(CD);
@@ -89,9 +90,10 @@ void loop()
 
             // We can only set bytes, so 'put' the wanted bit in the current byte
             uint8_t byte = driver_getByteAt(inbuff[0] / 8, inbuff[1]);
-            byte ^= (-inbuff[2] ^ byte) & (1UL << (inbuff[0] % 8));
+            byte ^= (~(-inbuff[2]) ^ byte) & (1UL << (7 - (inbuff[0] % 8)));
 
             driver_setByteAt(inbuff[0] / 8, inbuff[1], byte);
+            driver_writeScreen();
         } 
         else if (inbuff[1] == 0x19)
         { // Force write full screen
@@ -101,6 +103,7 @@ void loop()
             // Check if sent length is what we'd expect
             if (got == DRV_DATABUFF_SIZE){
                 Serial.readBytes(buff, DRV_DATABUFF_SIZE);
+                driver_setBuffer(buff, DRV_DATABUFF_SIZE);
                 driver_forceWriteScreen();
             } else {
                 Serial.write(CD);
