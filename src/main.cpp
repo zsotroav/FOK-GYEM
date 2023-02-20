@@ -8,11 +8,11 @@ uint8_t buff[DRV_DATABUFF_SIZE] = {0};
 // Buffer for incoming small data
 byte inbuff[8] = {0}; 
 // Expected handshake
-byte handshake[8] = {0xAA, 0x55, 0xAA, 0x55, 0x01, 0x01, 0x18, 0x07}; 
+byte handshake[8] = {0xAA, 0x55, 0xAA, 0x55, CFG_SERIAL_PROT_VER, CFG_PANEL_COUNT, 0x18, 0x07}; 
 // Our reply to the handshake
-byte message[6] = {0x01, 0x01, 0x18, 0x07, 0x00, 0x00}; 
+byte message[6] = {CFG_SERIAL_PROT_VER, CFG_PANEL_COUNT, 0x18, 0x07, 0x00, 0x00}; 
 
-// Connection reference number. Randomized for each connection 
+// Connection reference number. Randomized later for each connection 
 byte CD = 0xAF;
 
 void setup()

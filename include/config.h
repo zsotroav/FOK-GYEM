@@ -12,6 +12,11 @@
 #define CFG_PIXEL_POLARITY 0
 
 /**
+ * @brief The implemented SZIG-FOK-GYEM serial protocol version
+ */
+#define CFG_SERIAL_PROT_VER 1
+
+/**
  * @brief Enabling relative mode only updates the pixels that are different compared to the previous state
  */
 #define CFG_RELATIVE_MODE 1
