@@ -181,7 +181,7 @@ void driver_writeScreen() {
 						shiftReg_latchData(&_colCntrlReg);
 						shiftReg_outputSet(&_rowCntrlReg, true);
 						digitalWrite(CFG_COL_CONTROL_OUTPUT_12V, CFG_COL_CONTROL_OUTPUT_12V_ON);
-						delay(1);
+						delayMicroseconds(CFG_WRITE_TIME_US);
 						shiftReg_outputSet(&_rowCntrlReg, false);
 						digitalWrite(CFG_COL_CONTROL_OUTPUT_12V, CFG_COL_CONTROL_OUTPUT_12V_OFF);
 					}				
@@ -200,7 +200,7 @@ void driver_writeScreen() {
 						shiftReg_latchData(&_colCntrlReg);
 						shiftReg_outputSet(&_rowCntrlReg, true);
 						digitalWrite(CFG_COL_CONTROL_OUTPUT_GND, CFG_COL_CONTROL_OUTPUT_GND_ON);
-						delay(1);
+						delayMicroseconds(CFG_WRITE_TIME_US);
 						digitalWrite(CFG_COL_CONTROL_OUTPUT_GND, CFG_COL_CONTROL_OUTPUT_GND_OFF);
 						shiftReg_outputSet(&_rowCntrlReg, false);
 					}
