@@ -2,6 +2,15 @@
 #include "shiftRegister.h"
 #include "driver.h"
 
+/**
+ *                                !!! IMPORTANT !!!                               
+ * Make sure all settings in config.h are set correctly and according to your setup
+ *            Most important values: CFG_PANEL_COUNT and CFG_SERIAL_BAUD
+ * 
+ *          Do NOT change anything else unless you know what you are doing
+ *            to avoid damaging the Arduino, driver PCB, or the displays
+ */
+
 // Screen buffer
 uint8_t buff[DRV_DATABUFF_SIZE] = {0};
 
@@ -30,22 +39,23 @@ void setup()
     driver_setBuffer(buff, DRV_DATABUFF_SIZE);
     driver_forceWriteScreen();
 
+
     // Start serial
-    Serial.begin(9600);
-    randomSeed(millis());
+    Serial.begin(CFG_SERIAL_BAUD);
 
     // Wait for connection with proper handshake
     bool wait = true;
     while (wait)
     {
-        if (!Serial.available()) { continue; }
+        if (!Serial.available()) continue;
         
         // Read the handshake
         Serial.readBytes(inbuff, 8);
 
+        randomSeed(millis());
         CD = (random(0, 256) & 0xFF);
 
-        // If it is what we expect, good.
+        // If it is what we expect, accept connection
         if (memcmp(inbuff, handshake, 8) == 0)
         {
             message[4] = 0xFF;
@@ -126,6 +136,13 @@ void loop()
         Serial.readBytes(buff, DRV_DATABUFF_SIZE);
         driver_setBuffer(buff, DRV_DATABUFF_SIZE);
         driver_forceWriteScreen();
+    }
+
+    // Unknown command
+    else {
+        Serial.write(CD);
+        Serial.write(0x04); // Error for unknown command
+        return;
     }
 
     Serial.write(CD);

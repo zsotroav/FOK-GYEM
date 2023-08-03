@@ -7,9 +7,24 @@
  */
 #define CFG_PANEL_COUNT 1
 /**
+ * @brief The Serial communication's baud rate
+ */
+#define CFG_SERIAL_BAUD 57600
+
+/**
  * @brief Set the byte polarity of the driver - 0 is normal, 1 is inverted
  */
 #define CFG_PIXEL_POLARITY 0
+
+/**
+ *                             !!! IMPORTANT !!!                            
+ * Make sure all settings ABOVE are set correctly and according to your setup
+ *         Most important values: CFG_PANEL_COUNT and CFG_SERIAL_BAUD
+ * 
+ *       Do NOT change anything BELOW unless you know what you are doing
+ *         to avoid damaging the Arduino, driver PCB, or the displays
+ */
+
 
 /**
  * @brief The implemented SZIG-FOK-GYEM serial protocol version
@@ -29,7 +44,7 @@
  * Reference values: A good condition vertical screen works well with 400 us write time. For a horizontal one I was able
  * to decrease the value to 300 us. 
  *
- * 								!!!DANGER!!!
+ * 								!!! DANGER !!!
  * Increasing this value over 1000 us might cause overcurrent in the driver IC's or overheating the
  * windings which might destroy them.
  */
