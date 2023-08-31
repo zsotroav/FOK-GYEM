@@ -15,19 +15,36 @@
 uint8_t buff[DRV_DATABUFF_SIZE] = {0};
 
 // Buffer for incoming small data
-byte inbuff[8] = {0};
+byte inbuff[4] = {0};
 
 // Expected handshake
-byte handshake[8] = {0xAA, 0x55, 0xAA, 0x55, CFG_SERIAL_PROT_VER, CFG_PANEL_COUNT, 0x18, 0x07};
+byte config[3] = {CFG_PANEL_COUNT, DRV_COL_COUNT, DRV_ROW_COUNT};
+byte magic_header[4] = {0xAA, 0x55, 0xAA, 0x55};
 
 // Our reply to the handshake
-byte message[6] = {CFG_SERIAL_PROT_VER, CFG_PANEL_COUNT, 0x18, 0x07, 0x00, 0x00};
+byte message[6] = {CFG_SERIAL_PROT_VER, CFG_PANEL_COUNT, DRV_COL_COUNT, DRV_ROW_COUNT, 0x00, 0x00};
 
 // Connection reference number. Randomized later for each connection
 byte CD = 0xAF;
 
+
 // declare reset function at address 0
 void (*resetFunc)(void) = 0; 
+
+
+// Send the message to accept/deny connection
+void send(int garbage) 
+{
+    // Don't leave data unread as that may cause issues
+    if (garbage > 0) Serial.readBytes(inbuff, garbage);
+
+    // Write our response back
+    for (int x = 0; x < sizeof(message); x = x + 1)
+    {
+        Serial.write(message[x]);
+    }   
+}
+
 
 void setup()
 {
@@ -49,25 +66,26 @@ void setup()
     {
         if (!Serial.available()) continue;
         
-        // Read the handshake
-        Serial.readBytes(inbuff, 8);
+        // Read the magic header
+        Serial.readBytes(inbuff, 4);
+        if (memcmp(inbuff, magic_header, 4) != 0) { send(4); continue; }
+
+        // Read protocol version
+        Serial.readBytes(inbuff, 1);
+        if (inbuff[0] > 1) { send(3); continue; }
+
+        // Read physical details
+        Serial.readBytes(inbuff, 3);
+        if (memcmp(inbuff, config, 3) != 0) { send(0); continue; }
 
         randomSeed(millis());
         CD = (random(0, 256) & 0xFF);
 
         // If it is what we expect, accept connection
-        if (memcmp(inbuff, handshake, 8) == 0)
-        {
-            message[4] = 0xFF;
-            message[5] = CD;
-            wait = false;
-        }
-
-        // Write our response back
-        for (int x = 0; x < sizeof(message); x = x + 1)
-        {
-            Serial.write(message[x]);
-        }        
+        message[4] = 0xFF;
+        message[5] = CD;
+        wait = false;
+        send(0);
     }
 
     // Enter loop()...
